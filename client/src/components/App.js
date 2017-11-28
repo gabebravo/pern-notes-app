@@ -1,33 +1,48 @@
 import React, { Component } from 'react'
 import NotesList from './NotesList'
 import NoteForm from './NoteForm'
-import Note from '../classes'
+import axios from 'axios'
 
 class App extends Component {
 
     state = {
-        notes: [
-            { id: 1, title: 'Welcome Home', note: 'Glad you could make it home' }, 
-            { id: 2, title: 'Goodbye', note: 'See ya next time' },
-            { id: 3, title: 'Youre back', note: 'Good to see you again' }
-        ],
+        notes: [],
         selectedId: null, 
         selectedTitle: '',
         selectedNote: ''
     }
 
+    componentDidMount() {
+        axios.get('/notes')
+        .then( response => {
+            this.setState({
+                notes: response.data
+            })
+        })
+        .catch( response => {
+            console.log(response);
+        })
+    }
+
     // Select new empty note
     newNote = (e) => {
         e.preventDefault();
-        const { notes, selectedTitle, selectedNote } = this.state;
-        const newNote = new Note(notes.length + 1, selectedTitle, selectedNote);
-        const notesCopy = [...this.state.notes, newNote];
-        this.setState({ 
-            notes: notesCopy,
-            selectedId: null, 
-            selectedTitle: '',
-            selectedNote: ''
-        })
+        const { selectedTitle, selectedNote } = this.state;
+        axios.post('/notes', {
+            title: selectedTitle,
+            note: selectedNote
+          })
+          .then( response => {
+            this.setState({ 
+                notes: response.data,
+                selectedId: null, 
+                selectedTitle: '',
+                selectedNote: ''
+            })
+          })
+          .catch( response => {
+            console.log(response);
+          });
     }
 
     // Set note as selected
@@ -44,19 +59,23 @@ class App extends Component {
     onSubmit = (e) => {
         if( this.state.selectedId === null ) { return }
         e.preventDefault();
-        const notesCopy = [...this.state.notes].map( note => {
-            if( note.id === this.state.selectedId ) {
-                const { selectedId, selectedTitle, selectedNote } = this.state;
-                const newNote = new Note(selectedId, selectedTitle, selectedNote);
-                return newNote;
-            } else { return note }
+        const { selectedId, selectedTitle, selectedNote } = this.state;
+        axios.put(`/notes/${selectedId}`, {
+            title: selectedTitle,
+            note: selectedNote
         })
-        this.setState({ 
-            notes: notesCopy,
-            selectedId: null, 
-            selectedTitle: '',
-            selectedNote: ''
+        .then( response => {
+          console.log(response.data)
+          this.setState({ 
+              notes: response.data,
+              selectedId: null, 
+              selectedTitle: '',
+              selectedNote: ''
+          })
         })
+        .catch( response => {
+          console.log(response);
+        });
     }
 
     // Unselect note
@@ -83,14 +102,19 @@ class App extends Component {
 
     onDelete = id => {
         if( this.state.selectedId === null ) { return }
-        const notesCopy = [...this.state.notes]
-            .filter( note => note.id !== id );
-        this.setState({ 
-            notes: notesCopy,
-            selectedId: null, 
-            selectedTitle: '',
-            selectedNote: ''
-        })
+        axios.delete(`/notes/${id}`)
+          .then( response => {
+            this.setState({ 
+                notes: response.data,
+                selectedId: null, 
+                selectedTitle: '',
+                selectedNote: ''
+            })
+          })
+          .catch( response => {
+            console.log('you failed')
+            console.log(response);
+          });
     }
 
     render() {

@@ -1,6 +1,21 @@
 const express = require('express');
 const app = express();
+const bodyParser = require('body-parser');
+// import routes
+const notes = require('./routes/notes')
 
-app.listen(3001, () => {
-  console.log('listening on port 3001')
+// THIS MUST BE BEFORE THE ROUTES
+app.use(bodyParser.json());
+
+// routing middleware >> 2 params >> name of route and routes imported from router
+app.use( '/notes', notes );
+
+// THIS MUST BE AFTER THE ROUTES
+app.use( (err, req, res, next) => {
+  res.json(err);
+});
+
+const port = 3001;
+app.listen( port, () => {
+  console.log(`Listening on port ${port}`)
 })
