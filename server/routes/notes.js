@@ -23,36 +23,29 @@ router.post('/', (req, response, next) => {
 });
 
 // update a note
-router.put('/:id', (req, response, next) => {
-  const { id } = req.params;
-  const keys = [ 'title', 'note' ];
-  const fields = [];
-
-  keys.forEach( key => {
-    if( req.body[key] ) {
-      fields.push(key)
-    }
-  })
-
-  fields.forEach( (field, index) => {
+router.put('/', (req, response, next) => {
+  const { id, title, note } = req.body.note;
     pool.query(
-      `UPDATE notes SET ${field}=($1) WHERE id =($2)`, 
-      [req.body[field], id],
+      `UPDATE notes SET title=($1), note=($2) WHERE id=($3)`, 
+      [title, note, id],
       (err, result) => {
         if(err) { return next(err) }
-        if(index === (fields.length - 1)){
-          response.redirect('/notes')
-        }
+        pool.query('SELECT * FROM notes', (err, result) => {
+          if(err) { return next(err) }
+          response.json(result.rows);
+        })
     })
-  })
 });
 
 // delete a note 
-router.delete('/:id', (req, response, next) => {
-  const { id } = req.params;
+router.delete('/', (req, response, next) => {
+  const { id } = req.body;
   pool.query('DELETE FROM notes WHERE id=($1)', [id], (err, result) => {
     if(err) { return next(err) } // passes error to middleware handler
-    response.redirect('/notes')
+    pool.query('SELECT * FROM notes', (err, result) => {
+      if(err) { return next(err) }
+      response.json(result.rows);
+    })
   })
 });
 

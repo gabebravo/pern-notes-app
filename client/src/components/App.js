@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 import NotesList from './NotesList'
 import NoteForm from './NoteForm'
+import Note from '../classes'
 import axios from 'axios'
 
 class App extends Component {
@@ -60,12 +61,13 @@ class App extends Component {
         if( this.state.selectedId === null ) { return }
         e.preventDefault();
         const { selectedId, selectedTitle, selectedNote } = this.state;
-        axios.put(`/notes/${selectedId}`, {
-            title: selectedTitle,
-            note: selectedNote
-        })
+        const updatedNote = new Note( selectedId, selectedTitle, selectedNote );
+        axios({
+            method: 'put',
+            url: '/notes',
+            data: { note: updatedNote }
+          })
         .then( response => {
-          console.log(response.data)
           this.setState({ 
               notes: response.data,
               selectedId: null, 
@@ -102,7 +104,13 @@ class App extends Component {
 
     onDelete = id => {
         if( this.state.selectedId === null ) { return }
-        axios.delete(`/notes/${id}`)
+          axios({
+            method: 'delete',
+            url: '/notes',
+            data: {
+              id: this.state.selectedId
+            }
+          })
           .then( response => {
             this.setState({ 
                 notes: response.data,
@@ -112,7 +120,6 @@ class App extends Component {
             })
           })
           .catch( response => {
-            console.log('you failed')
             console.log(response);
           });
     }
