@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 // import routes
-const notes = require('./routes/notes')
+const notes = require('./server/routes/notes')
 
 // THIS MUST BE BEFORE THE ROUTES
 app.use(bodyParser.json());
