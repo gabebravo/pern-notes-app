@@ -15,7 +15,7 @@ app.use( (err, req, res, next) => {
   res.json(err);
 });
 
-const port = 3001;
+const port = process.env.PORT;
 app.listen( port, () => {
   console.log(`Listening on port ${port}`)
 })
